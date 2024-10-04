@@ -1,53 +1,54 @@
-name: Patch-Recovery
+name: Patch Recovery Image
 
 on:
   workflow_dispatch:
+    inputs:
+      RECOVERY_URL:
+        description: 'URL of the recovery image to patch'
+        required: true
+        default: 'https://we.tl/t-MKbgvT5uQT'
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check Out Repository
-      uses: actions/checkout@v4
-
-    - name: Prepare Environment
+    - name: Prepare environment
       run: |
-        sudo apt update
-        sudo apt install git wget lz4 tar openssl python3 -y
+        sudo apt-get update
+        sudo apt-get install -y wget lz4 tar python3
 
-    - name: Download Recovery Image
+    - name: Download recovery image
       run: |
-        wget https://we.tl/t-MKbgvT5uQT -O recovery.img  # Descarga el archivo de la URL y lo renombra como recovery.img
-
-    - name: Verify Recovery Image
-      run: |
+        wget ${{ github.event.inputs.RECOVERY_URL }} -O recovery.img
         if [ ! -f recovery.img ]; then
-          echo "recovery.img not found!"
+          echo "Recovery image not downloaded!"
           exit 1
         fi
-        ls -lh recovery.img
 
-    - name: Patch Recovery Image
+    - name: Patch recovery image
       run: |
         chmod a+x magiskboot
-        ./magiskboot --patch recovery.img recovery-patched.img  # Reemplaza con el comando de parche que necesites
+        ./magiskboot unpack recovery.img
+        ./magiskboot cpio ramdisk.cpio "patch"
+        ./magiskboot repack recovery.img recovery-patched.img
 
-    - name: Verify Patched Recovery Image
+    - name: Check patched image
       run: |
         if [ ! -f recovery-patched.img ]; then
-          echo "recovery-patched.img not found!"
+          echo "Patched recovery image not found!"
           exit 1
         fi
-        ls -lh recovery-patched.img
 
-    - name: Package Patched Recovery
+    - name: Package patched recovery image
       run: |
-        mkdir output && mv recovery-patched.img output/
-        tar cvf output/fastbootd-recovery.tar output/recovery-patched.img
-        md5sum output/fastbootd-recovery.tar > output/fastbootd-recovery.tar.md5
+        mkdir output
+        mv recovery-patched.img output/recovery.img
+        cd output
+        tar cvf fastbootd-recovery.tar recovery.img
+        md5sum fastbootd-recovery.tar > fastbootd-recovery.tar.md5
 
-    - name: Upload Patched Recovery
+    - name: Upload patched recovery
       uses: actions/upload-artifact@v3
       with:
         path: output/*
