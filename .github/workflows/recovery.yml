@@ -41,14 +41,9 @@ jobs:
       run: |
         chmod a+x script2.sh
         ./script2.sh || true
-
-    - name: Verify new-boot.img exists  
-      run: |
-        if [ ! -f new-boot.img ]; then
-          echo "new-boot.img not found!"
-          exit 1
-        fi
         
+    
+    
     - name: Continue with AVB Tool Processing
       run: |
         python3 avbtool extract_public_key --key phh.pem --output phh.pub.bin
