@@ -6,7 +6,7 @@ on:
       RECOVERY_URL:
         description: 'RECOVERY URL'
         required: true
-        default: 'https://we.tl/t-MKbgvT5uQT'
+        default: 'https://we.tl/t-MKbgvT5uQT'  # This will be your default link
 
 jobs:
   build:
@@ -19,18 +19,18 @@ jobs:
     - name: Prepare the environment
       run: |
         sudo apt install git wget lz4 tar openssl python3 -y
-
+        
     - name: Fetch image from URL
       run: |
         wget ${{ github.event.inputs.RECOVERY_URL }}
         ls
         pwd
 
-    - name: Verify Downloaded File  # Add this step here
+    - name: Verify Downloaded File
       run: |
         ls -lh
         file $(basename ${{ github.event.inputs.RECOVERY_URL }})
-
+        
     - name: Patch Process-1
       run: |
         chmod a+x script1.sh
