@@ -6,10 +6,7 @@ on:
       RECOVERY_URL:
         description: 'RECOVERY URL'
         required: true
-        default: 'https://transfer.sh/(RECOMMENDED)'
-
-env:
-  RECOVERY_URL: https://we.tl/t-MKbgvT5uQT
+        default: 'https://we.tl/t-MKbgvT5uQT'
 
 jobs:
   build:
@@ -17,7 +14,7 @@ jobs:
 
     steps:
     - name: Check Out
-      uses: actions/checkout@main
+      uses: actions/checkout@v4
 
     - name: Prepare the environment
       run: |
@@ -25,16 +22,21 @@ jobs:
 
     - name: Fetch image from URL
       run: |
+        wget ${{ github.event.inputs.RECOVERY_URL }}
         ls
         pwd
-        wget ${{github.event.inputs.RECOVERY_URL }}
+
+    - name: Verify Downloaded File  # Add this step here
+      run: |
+        ls -lh
+        file $(basename ${{ github.event.inputs.RECOVERY_URL }})
 
     - name: Patch Process-1
       run: |
         chmod a+x script1.sh
         chmod a+x magiskboot
         ./script1.sh || true
-
+        
     - name: Patch Process-2
       run: |
         chmod a+x script2.sh
@@ -44,9 +46,9 @@ jobs:
         mkdir output && cd output
         mv ../recovery-patched.img recovery.img
         tar cvf fastbootd-recovery.tar recovery.img
-
+        
     - name: Upload Recovery
-      uses: actions/upload-artifact@v3.0.0
+      uses: actions/upload-artifact@v3
       with:
         path: /home/runner/work/Patch-Recovery/Patch-Recovery/output/*.tar
         name: Patched-Recovery
