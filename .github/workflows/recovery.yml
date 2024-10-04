@@ -6,10 +6,10 @@ on:
       RECOVERY_URL:
         description: 'RECOVERY URL'
         required: true
-        default: 'https://transfer.sh/(RECOMMENDED)'
+        default: 'https://we.tl/t-MKbgvT5uQT'
 
 env:
-  RECOVERY_URL: https://oshi.at/Rpjg
+  RECOVERY_URL: https://we.tl/t-MKbgvT5uQT
 
 jobs:
   build:
@@ -25,9 +25,8 @@ jobs:
 
     - name: Fetch image from URL
       run: |
-        ls
-        pwd
-        wget ${{github.event.inputs.RECOVERY_URL }}
+        echo "Downloading recovery image from: ${{ github.event.inputs.RECOVERY_URL }}"
+        wget "${{ github.event.inputs.RECOVERY_URL }}" -O recovery.img
 
     - name: Patch Process-1
       run: |
@@ -44,11 +43,9 @@ jobs:
         mkdir output && cd output
         mv ../recovery-patched.img recovery.img
         tar cvf fastbootd-recovery.tar recovery.img
-        md5sum -t fastbootd-recovery.tar >> fastbootd-recovery.tar
-        mv fastbootd-recovery.tar fastbootd-recovery.tar.md5
 
     - name: Upload Recovery
       uses: actions/upload-artifact@v3.0.0
       with:
-        path: /home/runner/work/Patch-Recovery/Patch-Recovery/output/*.md5
+        path: /home/runner/work/Patch-Recovery/Patch-Recovery/output/*.tar
         name: Patched-Recovery
