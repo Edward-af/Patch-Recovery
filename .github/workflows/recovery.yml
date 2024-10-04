@@ -26,9 +26,12 @@ jobs:
           exit 1
         fi
 
-    - name: Patch recovery image
+    - name: Ensure magiskboot is executable
       run: |
         chmod a+x magiskboot
+
+    - name: Patch recovery image
+      run: |
         ./magiskboot unpack recovery.img
         ./magiskboot cpio ramdisk.cpio "patch"
         ./magiskboot repack recovery.img recovery-patched.img
